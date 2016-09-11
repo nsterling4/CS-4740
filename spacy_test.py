@@ -23,14 +23,12 @@ def tokenize(filepath):
 		else:
 			fixed_sents.append(sentences[x])
 
-	fixed_sents
+	
 	word_arr = []
 	bad_char_list = ["-","=","/","<",">","#","|"]
 	for sent in fixed_sents:
 		
 		words = sent.split()
-		#if words[0].encode('utf-8') = "From" and words[0].encode('utf-8') == "Subject":
-		#	print words[0].encode('utf-8')
 		if words[0].encode('utf-8') != "From" and words[0].encode('utf-8') != "Subject":
 			word_arr.append("<s>")
 			for x in range(0,len(words)):
@@ -45,15 +43,37 @@ def tokenize(filepath):
 
 def make_bigram_dict(tokens):
 	bicount = {}
-
+	biprobs = {}
+	total = 0
 	for x in xrange(0,len(tokens)):
 		if x+1<len(tokens):
 			if (tokens[x],tokens[x+1]) in bicount:
 				bicount[(tokens[x],tokens[x+1])] = bicount[(tokens[x],tokens[x+1])] + 1
+				total += 1
 			else:
 				bicount[(tokens[x],tokens[x+1])] = 1
+				total += 1
 
-	print bicount
+	for bi in bicount:
+		biprobs[bi] = bicount[bi]/total
+
+	print biprobs
+
+def make_unigram_dict(tokens):
+	unicount = {}
+
+	for x in xrange(0,len(tokens)):
+		if x+1<len(tokens):
+			if tokens[x] in unicount:
+				unicount[tokens[x]] = unicount[tokens[x]] + 1
+			else:
+				unicount[tokens[x]] = 1
+
+	print unicount
+
+
+
+
 
 make_bigram_dict(tokenize("data_corrected/classification task/medicine/train_docs/medicine_file21.txt"))
 
