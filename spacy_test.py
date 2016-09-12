@@ -30,7 +30,7 @@ def tokenize(filepath, en_nlp):
 
 
 	word_arr = []
-	bad_char_list = ["-","=","/","<",">","#","|","(",")","[","]","*","'",'"',";",":","`",",","@","+"]
+	bad_char_list = ["-","=","/","<",">","#","|","(",")","[","]","*","'",'"',";",":","`",",","@","+","^"]
 	for sent in fixed_sents:
 		
 		words = sent.split()
@@ -38,7 +38,7 @@ def tokenize(filepath, en_nlp):
 			word_arr.append("<s>")
 			for x in range(0,len(words)):
 				if (x+1) < len(words):
-					if words[x] != "." and words[x] not in bad_char_list and words[x].find("@") == -1 and words[x].find(".") == -1:
+					if words[x] != "." and words[x] != "?" and words[x] != "!" and words[x] not in bad_char_list and words[x].find("@") == -1 and words[x].find(".") == -1:
 						word_arr.append(words[x].encode('utf-8').lower())
 
 			word_arr.append("</s>")		
