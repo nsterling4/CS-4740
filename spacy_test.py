@@ -10,16 +10,17 @@ def both_not_in(var1,var2,l):
 	else:
 		return False
 
-def tokenize(filepath):
-	en_nlp = spacy.load('en')
-
+def tokenize(filepath, en_nlp):
 	file_obj = open(filepath,'r')
 	file_str = file_obj.read()
 
-	en_doc = en_nlp(unicode(file_str.decode('unicode_escape')))
+
+	en_doc = en_nlp(file_str.decode('utf8'))
 
 	sentences = [sent.string.strip() for sent in en_doc.sents]
+
 	fixed_sents = []
+	file_obj.close()
 	for x in range(0,len(sentences)):
 		if len(sentences) > (x+1) and len(sentences[x+1]) == 3:
 			fixed_sents.append(sentences[x] + sentences[x+1])
@@ -27,17 +28,17 @@ def tokenize(filepath):
 		else:
 			fixed_sents.append(sentences[x])
 
-	
+
 	word_arr = []
-	bad_char_list = ["-","=","/","<",">","#","|","(",")"]
+	bad_char_list = ["-","=","/","<",">","#","|","(",")","[","]","*","'",'"',";",":","`",",","@","+"]
 	for sent in fixed_sents:
 		
 		words = sent.split()
-		if words[0].encode('utf-8') != "From" and words[0].encode('utf-8') != "Subject":
+		if words[0].encode('utf-8') != "From" and words[0].encode('utf-8') != "Subject" :
 			word_arr.append("<s>")
 			for x in range(0,len(words)):
 				if (x+1) < len(words):
-					if words[x] != "." and words[x] not in bad_char_list:
+					if words[x] != "." and words[x] not in bad_char_list and words[x].find("@") == -1 and words[x].find(".") == -1:
 						word_arr.append(words[x].encode('utf-8').lower())
 
 			word_arr.append("</s>")		
@@ -120,9 +121,13 @@ def make_bigram_sentence(bi_probs):
 
 
 corpus = [] 
-for fn in os.listdir('data_corrected/classification task/medicine/test_medicine'):
+print "load start"
+en_nlp = spacy.load('en')
+print "load finish"
+for fn in os.listdir('data_corrected/classification task/space/train_docs'):
+    print "running through files"
     if not fn.startswith('.'):
-    	corpus = corpus + tokenize('data_corrected/classification task/medicine/test_medicine/' + fn)
+    	corpus = corpus + tokenize('data_corrected/classification task/space/train_docs/' + fn, en_nlp)
 #corpus = tokenize('data_corrected/classification task/medicine/test_medicine/test_medicinefile1.txt')
 
 uni_dict = make_unigram_dict(corpus)
@@ -143,31 +148,9 @@ bi_probs = {}
 for bi in bi_count:
 	bi_probs[bi] = bi_count[bi]/uni_count[bi[0]]
 
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
+
+print "\n"
+print "Display Unigram Model Sentences\n"
 print make_unigram_sentence(uni_probs)
 print make_unigram_sentence(uni_probs)
 print make_unigram_sentence(uni_probs)
@@ -186,3 +169,31 @@ print make_unigram_sentence(uni_probs)
 print make_unigram_sentence(uni_probs)
 print make_unigram_sentence(uni_probs)
 print make_unigram_sentence(uni_probs)
+print "\n"
+print "Display Bigram Model Sentences\n"
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+print make_bigram_sentence(bi_probs)
+
