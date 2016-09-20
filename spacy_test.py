@@ -30,7 +30,7 @@ def tokenize(filepath, en_nlp):
 
 
 	word_arr = []
-	bad_char_list = ["-","=","/","<",">","#","|","(",")","[","]","*","'",'"',";",":","`",",","@","+","^", "$", "~"]
+	bad_char_list = ["-","=","/","<",">","#","|","(",")","[","]","*","'",'"',";",":","`",",","@","+"]
 	for sent in fixed_sents:
 		
 		words = sent.split()
@@ -143,57 +143,74 @@ bi_dict = make_bigram_dict(corpus)
 bi_count = bi_dict[0]
 bi_total = bi_dict[1]
 bi_probs = {}
+count_dict = {}
+N_0 = (len(uni_count.keys())**2) - len(bi_count.keys())
 
 # Getting bigram probabilities
 for bi in bi_count:
 	bi_probs[bi] = bi_count[bi]/uni_count[bi[0]]
+	# Get dictionary of all bigrams and counts for smoothing
+	# Each entry is composed of a count, N, and how many bigrams occurred with that N
+	if bi_count[bi] not in count_dict:
+		count_dict[bi_count[bi]] = 1
+	else:
+		count_dict[bi_count[bi]] = count_dict[bi_count[bi]] + 1
+
+count_dict2 = {}
+count_dict[0]= N_0
+for count in count_dict:
+	#count_dict2[count+1] = count_dict[count]
+	if count < 5:
+		count_dict2[count] = (count+1)*(count_dict[count+1]/count_dict[count])
+
+print count_dict2
 
 
-print "\n"
-print "Display Unigram Model Sentences\n"
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print make_unigram_sentence(uni_probs)
-print "\n"
-print "Display Bigram Model Sentences\n"
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
-print make_bigram_sentence(bi_probs)
+# print "\n"
+# print "Display Unigram Model Sentences\n"
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print make_unigram_sentence(uni_probs)
+# print "\n"
+# print "Display Bigram Model Sentences\n"
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
+# print make_bigram_sentence(bi_probs)
 
