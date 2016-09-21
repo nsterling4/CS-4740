@@ -2,6 +2,7 @@ from __future__ import division
 import spacy
 import os
 import numpy
+import math
 
 
 def both_not_in(var1,var2,l):
@@ -120,15 +121,44 @@ def make_bigram_sentence(bi_probs):
 	return sentence
 
 
+def calc_perplexity(bi_probs,test_file_tokens):
+	#calculating perplexity from bigram probability
+
+	#Get all bigrams from test_file_tokens
+	acc = 0.0
+	test_bigrams = []
+	min_prob = min(bi_probs, key=bi_probs.get)
+	for x in xrange(0,len(test_file_tokens)):
+		if x+1<len(test_file_tokens):
+			test_bigrams.append((test_file_tokens[x],test_file_tokens[x+1]))
+
+	test_file_probs = {}
+	for bigram in test_bigrams:
+		if bigram in bi_probs.keys():
+			prob = bi_probs[bigram]
+		else:
+			prob = bi_probs[min_prob]
+		
+		if prob > 0.0:
+			exp = -math.log(prob)
+			acc += exp
+
+	result = acc ** (1.0/len(test_file_tokens))
+
+	return result
+
+
+
+
 corpus = [] 
 print "load start"
 en_nlp = spacy.load('en')
 print "load finish"
-# for fn in os.listdir('data_corrected/classification task/space/train_docs'):
-#     print "running through files"
-#     if not fn.startswith('.'):
-#     	corpus = corpus + tokenize('data_corrected/classification task/space/train_docs/' + fn, en_nlp)
-corpus = tokenize('data_corrected/classification task/medicine/test_medicinefile1.txt',en_nlp)
+for fn in os.listdir('data_corrected/classification task/space/train_docs'):
+    print "running through files"
+    if not fn.startswith('.'):
+    	corpus = corpus + tokenize('data_corrected/classification task/space/train_docs/' + fn, en_nlp)
+#corpus = tokenize('data_corrected/classification task/medicine/test_medicinefile1.txt',en_nlp)
 
 uni_dict = make_unigram_dict(corpus)
 uni_count = uni_dict[0]
@@ -164,7 +194,7 @@ for uni in uni_count:
 		adj_uni_count["<unk>"] = adj_uni_count["<unk>"] + 1
 	else:
 		adj_uni_count[uni] = uni_count[uni]
-print adj_uni_count
+#print adj_uni_count
 
 adj_bi_count = {}
 for bi in bi_count:
@@ -186,7 +216,6 @@ for count in count_dict:
 
 #print count_dict2
 
-
 #PERPLEXITY
 # for fn in os.listdir('data_corrected/classification task/test_for_classification'):
 #     print "running through files"
@@ -194,8 +223,7 @@ for count in count_dict:
 #     		test_file = tokenize('data_corrected/classification task/test_for_classification/' + fn, en_nlp)
 print "tokenizing test_file for PERPLEXITY"
 test_file = tokenize('data_corrected/classification task/test_for_classification/file_0.txt', en_nlp)
-
-
+print "Perplexity =",calc_perplexity(bi_probs,test_file)
 
 
 # print "\n"
