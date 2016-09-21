@@ -124,11 +124,11 @@ corpus = []
 print "load start"
 en_nlp = spacy.load('en')
 print "load finish"
-for fn in os.listdir('data_corrected/classification task/space/train_docs'):
-    print "running through files"
-    if not fn.startswith('.'):
-    	corpus = corpus + tokenize('data_corrected/classification task/space/train_docs/' + fn, en_nlp)
-#corpus = tokenize('data_corrected/classification task/medicine/test_medicine/test_medicinefile1.txt')
+# for fn in os.listdir('data_corrected/classification task/space/train_docs'):
+#     print "running through files"
+#     if not fn.startswith('.'):
+#     	corpus = corpus + tokenize('data_corrected/classification task/space/train_docs/' + fn, en_nlp)
+corpus = tokenize('data_corrected/classification task/medicine/test_medicinefile1.txt',en_nlp)
 
 uni_dict = make_unigram_dict(corpus)
 uni_count = uni_dict[0]
@@ -156,6 +156,27 @@ for bi in bi_count:
 	else:
 		count_dict[bi_count[bi]] = count_dict[bi_count[bi]] + 1
 
+# Adjust unigram and bigram counts to have unknown words counted
+adj_uni_count = {}
+adj_uni_count["<unk>"] = 1
+for uni in uni_count:
+	if uni_count[uni] == 1:
+		adj_uni_count["<unk>"] = adj_uni_count["<unk>"] + 1
+	else:
+		adj_uni_count[uni] = uni_count[uni]
+print adj_uni_count
+
+adj_bi_count = {}
+for bi in bi_count:
+	if bi[0] not in adj_uni_count.keys():
+		adj_bi_count[("<unk>",bi[1])] = bi_count[bi]
+	elif bi[1] not in adj_uni_count.keys():
+		adj_bi_count[(bi[0],"<unk>")] = bi_count[bi]
+	else:
+		adj_bi_count[bi] = bi_count[bi]
+
+#print adj_bi_count
+
 count_dict2 = {}
 count_dict[0]= N_0
 for count in count_dict:
@@ -163,7 +184,18 @@ for count in count_dict:
 	if count < 5:
 		count_dict2[count] = (count+1)*(count_dict[count+1]/count_dict[count])
 
-print count_dict2
+#print count_dict2
+
+
+#PERPLEXITY
+# for fn in os.listdir('data_corrected/classification task/test_for_classification'):
+#     print "running through files"
+#     	if not fn.startswith('.'):
+#     		test_file = tokenize('data_corrected/classification task/test_for_classification/' + fn, en_nlp)
+print "tokenizing test_file for PERPLEXITY"
+test_file = tokenize('data_corrected/classification task/test_for_classification/file_0.txt', en_nlp)
+
+
 
 
 # print "\n"
