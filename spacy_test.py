@@ -3,6 +3,7 @@ import spacy
 import os
 import numpy
 import math
+import csv
 
 
 def both_not_in(var1,var2,l):
@@ -10,6 +11,14 @@ def both_not_in(var1,var2,l):
 		return True
 	else:
 		return False
+def update_tokens(uni_count,tokens):
+	new_tokens = []
+	for token in tokens:
+		if uni_count[token] == 1:
+			new_tokens.append("<unk>")
+		else:
+			new_tokens.append(token)
+	return new_tokens
 
 def tokenize(filepath, en_nlp):
 	file_obj = open(filepath,'r')
@@ -107,6 +116,7 @@ def make_bigram_sentence(bi_probs):
 	end = False
 	while end == False:
 		subset = get_elements(word,bi_probs)
+		print subset
 		bigrams = subset.keys()
 		probs = subset.values()
 		list1,list2 = zip(*bigrams)
@@ -121,18 +131,26 @@ def make_bigram_sentence(bi_probs):
 	return sentence
 
 
-def calc_perplexity(bi_probs,test_file_tokens):
+
+def calc_perplexity(bi_probs,corpus,test_file_tokens):
 	#calculating perplexity from bigram probability
 
 	#Get all bigrams from test_file_tokens
-	acc = 0.0
+	acc = 1.0
 	test_bigrams = []
 	min_prob = min(bi_probs, key=bi_probs.get)
 	for x in xrange(0,len(test_file_tokens)):
 		if x+1<len(test_file_tokens):
-			test_bigrams.append((test_file_tokens[x],test_file_tokens[x+1]))
+			#make bigrams while replacing unknowns
+			word1 = test_file_tokens[x]
+			word2 = test_file_tokens[x+1] 
+			if word1 not in corpus:
+				word1 = "<unk>"
+			if word2 not in corpus:
+				word2 = "<unk>"
 
-	test_file_probs = {}
+			test_bigrams.append((word1,word2))
+
 	for bigram in test_bigrams:
 		if bigram in bi_probs.keys():
 			prob = bi_probs[bigram]
@@ -143,9 +161,10 @@ def calc_perplexity(bi_probs,test_file_tokens):
 			exp = -math.log(prob)
 			acc += exp
 
-	result = acc ** (1.0/len(test_file_tokens))
+	#print test_bigrams
+	result = acc * (1.0/len(test_file_tokens))
 
-	return result
+	return math.exp(result)
 
 
 
@@ -154,17 +173,26 @@ corpus = []
 print "load start"
 en_nlp = spacy.load('en')
 print "load finish"
-for fn in os.listdir('data_corrected/classification task/space/train_docs'):
+c = csv.writer(open("perplexity.csv", "wb",0),delimiter=',')
+
+"""Code to test individual perplexity calculations"""
+for fn in os.listdir('data_corrected/classification task/motorcycles/train_docs'):
     print "running through files"
     if not fn.startswith('.'):
-    	corpus = corpus + tokenize('data_corrected/classification task/space/train_docs/' + fn, en_nlp)
+    	corpus = corpus + tokenize('data_corrected/classification task/motorcycles/train_docs/' + fn, en_nlp)
 #corpus = tokenize('data_corrected/classification task/medicine/test_medicinefile1.txt',en_nlp)
 
+
+# Get unigram counts and probabilities replacing unknown words
+uni_dict = make_unigram_dict(corpus)
+uni_count = uni_dict[0]
+
+# UPDATE TOKENS 
+corpus = update_tokens(uni_count,corpus)
 uni_dict = make_unigram_dict(corpus)
 uni_count = uni_dict[0]
 uni_total = uni_dict[1]
 uni_probs = {}
-#getting unigram probabilities
 for uni in uni_count:
 	uni_probs[uni] = uni_count[uni]/uni_total
 
@@ -175,7 +203,6 @@ bi_total = bi_dict[1]
 bi_probs = {}
 count_dict = {}
 N_0 = (len(uni_count.keys())**2) - len(bi_count.keys())
-
 # Getting bigram probabilities
 for bi in bi_count:
 	bi_probs[bi] = bi_count[bi]/uni_count[bi[0]]
@@ -186,27 +213,9 @@ for bi in bi_count:
 	else:
 		count_dict[bi_count[bi]] = count_dict[bi_count[bi]] + 1
 
-# Adjust unigram and bigram counts to have unknown words counted
-adj_uni_count = {}
-adj_uni_count["<unk>"] = 1
-for uni in uni_count:
-	if uni_count[uni] == 1:
-		adj_uni_count["<unk>"] = adj_uni_count["<unk>"] + 1
-	else:
-		adj_uni_count[uni] = uni_count[uni]
-#print adj_uni_count
 
-adj_bi_count = {}
-for bi in bi_count:
-	if bi[0] not in adj_uni_count.keys():
-		adj_bi_count[("<unk>",bi[1])] = bi_count[bi]
-	elif bi[1] not in adj_uni_count.keys():
-		adj_bi_count[(bi[0],"<unk>")] = bi_count[bi]
-	else:
-		adj_bi_count[bi] = bi_count[bi]
 
-#print adj_bi_count
-
+# Good turing counts for bigrams
 count_dict2 = {}
 count_dict[0]= N_0
 for count in count_dict:
@@ -214,16 +223,18 @@ for count in count_dict:
 	if count < 5:
 		count_dict2[count] = (count+1)*(count_dict[count+1]/count_dict[count])
 
-#print count_dict2
 
 #PERPLEXITY
-# for fn in os.listdir('data_corrected/classification task/test_for_classification'):
-#     print "running through files"
-#     	if not fn.startswith('.'):
-#     		test_file = tokenize('data_corrected/classification task/test_for_classification/' + fn, en_nlp)
+
 print "tokenizing test_file for PERPLEXITY"
-test_file = tokenize('data_corrected/classification task/test_for_classification/file_0.txt', en_nlp)
-print "Perplexity =",calc_perplexity(bi_probs,test_file)
+for fn in os.listdir('data_corrected/classification task/test_for_classification'):
+	    print "running through perplexity test files"
+	    if not fn.startswith('.'):
+	    	test_file = tokenize('data_corrected/classification task/test_for_classification/' + fn, en_nlp)
+	    	print fn
+	    	perplexity = calc_perplexity(bi_probs,corpus,test_file)
+	    	print "Perplexity =",perplexity
+	    	#c.writerow([fn])
 
 
 # print "\n"
@@ -247,8 +258,8 @@ print "Perplexity =",calc_perplexity(bi_probs,test_file)
 # print make_unigram_sentence(uni_probs)
 # print make_unigram_sentence(uni_probs)
 # print "\n"
-# print "Display Bigram Model Sentences\n"
-# print make_bigram_sentence(bi_probs)
+print "Display Bigram Model Sentences\n"
+print make_bigram_sentence(bi_probs)
 # print make_bigram_sentence(bi_probs)
 # print make_bigram_sentence(bi_probs)
 # print make_bigram_sentence(bi_probs)
