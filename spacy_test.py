@@ -173,13 +173,13 @@ corpus = []
 print "load start"
 en_nlp = spacy.load('en')
 print "load finish"
-c = csv.writer(open("perplexity.csv", "wb",0),delimiter=',')
+c = csv.writer(open("perplexity.csv", "wb"),delimiter=',')
 
 """Code to test individual perplexity calculations"""
-for fn in os.listdir('data_corrected/classification task/motorcycles/train_docs'):
+for fn in os.listdir('data_corrected/classification task/space/train_docs'):
     print "running through files"
     if not fn.startswith('.'):
-    	corpus = corpus + tokenize('data_corrected/classification task/motorcycles/train_docs/' + fn, en_nlp)
+    	corpus = corpus + tokenize('data_corrected/classification task/space/train_docs/' + fn, en_nlp)
 #corpus = tokenize('data_corrected/classification task/medicine/test_medicinefile1.txt',en_nlp)
 
 
@@ -230,11 +230,11 @@ print "tokenizing test_file for PERPLEXITY"
 for fn in os.listdir('data_corrected/classification task/test_for_classification'):
 	    print "running through perplexity test files"
 	    if not fn.startswith('.'):
-	    	test_file = tokenize('data_corrected/classification task/test_for_classification/' + fn, en_nlp)
+	    	test_file = update_tokens(make_unigram_dict(tokenize('data_corrected/classification task/test_for_classification/' + fn, en_nlp))[0],tokenize('data_corrected/classification task/test_for_classification/' + fn, en_nlp))
 	    	print fn
 	    	perplexity = calc_perplexity(bi_probs,corpus,test_file)
 	    	print "Perplexity =",perplexity
-	    	#c.writerow([fn])
+	    	c.writerow([perplexity])
 
 
 # print "\n"
