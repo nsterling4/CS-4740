@@ -223,9 +223,10 @@ for count in count_dict:
 	if count < 5:
 		count_dict2[count] = (count+1)*(count_dict[count+1]/count_dict[count])
 
+print count_dict2
 
 #PERPLEXITY
-
+"""
 print "tokenizing test_file for PERPLEXITY"
 for fn in os.listdir('data_corrected/classification task/test_for_classification'):
 	    print "running through perplexity test files"
@@ -235,7 +236,7 @@ for fn in os.listdir('data_corrected/classification task/test_for_classification
 	    	perplexity = calc_perplexity(bi_probs,corpus,test_file)
 	    	print "Perplexity =",perplexity
 	    	c.writerow([perplexity])
-
+"""
 
 # print "\n"
 # print "Display Unigram Model Sentences\n"
@@ -258,8 +259,8 @@ for fn in os.listdir('data_corrected/classification task/test_for_classification
 # print make_unigram_sentence(uni_probs)
 # print make_unigram_sentence(uni_probs)
 # print "\n"
-print "Display Bigram Model Sentences\n"
-print make_bigram_sentence(bi_probs)
+#print "Display Bigram Model Sentences\n"
+#print make_bigram_sentence(bi_probs)
 # print make_bigram_sentence(bi_probs)
 # print make_bigram_sentence(bi_probs)
 # print make_bigram_sentence(bi_probs)

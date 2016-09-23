@@ -109,6 +109,49 @@ def make_unigram_dict(tokens):
 			total += 1			
 	return [unicount,total]
 
+def calc_tri_perplexity(tri_probs,corpus,test_file_tokens):
+	#calculating perplexity from trigram probability
+
+	#Get all trigrams from test_file_tokens
+	acc = 0.0
+	test_trigrams = []
+	min_prob = min(tri_probs, key=tri_probs.get)
+	for x in xrange(0,len(test_file_tokens)):
+		if x+2<len(test_file_tokens):
+			#make trigrams while replacing unknowns
+			word1 = test_file_tokens[x]
+			word2 = test_file_tokens[x+1]
+			word3 = test_file_tokens[x+2] 
+			"""if word1 not in corpus:
+				print word1
+				word1 = "<unk>"
+			if word2 not in corpus:
+				word2 = "<unk>"
+			if word3 not in corpus:
+				word3 = "<unk>"""
+
+			test_trigrams.append((word1,word2,word3))
+	#print test_trigrams
+	for trigram in test_trigrams:
+		if trigram in tri_probs.keys():
+			
+			prob = tri_probs[trigram]
+			print prob,trigram
+		else:
+			prob = tri_probs[min_prob]
+		
+		if prob > 0.0:
+			
+			exp = -math.log(prob)
+			#print exp
+			acc += exp
+
+	#print test_bigrams
+	result = acc * (1.0/len(test_file_tokens))
+
+	return math.exp(result)
+
+
 corpus = [] 
 print "load start"
 en_nlp = spacy.load('en')
@@ -197,7 +240,8 @@ def make_trigram_sentence(tri_probs,bi_probs):
 			word2 = sample
 	return sentence
 
-
 tri_gram_probs = get_trigram_probs(bi_count,tri_count)
+test_file = tokenize('data_corrected/classification task/test_for_classification/file_0.txt', en_nlp)
+perplexity = calc_tri_perplexity(tri_gram_probs,corpus,test_file)
+
 print make_trigram_sentence(tri_gram_probs,bi_probs)
-print bi_count
